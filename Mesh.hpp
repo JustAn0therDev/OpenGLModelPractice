@@ -44,6 +44,10 @@ public:
 	vector<Texture>      textures;
 	unsigned int VAO;
 
+	const float constant = 1.0f;
+	const float linear = 0.7f;
+	const float quadratic = 1.8f;
+
 	// constructor
 	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
 	{
@@ -82,6 +86,22 @@ public:
 			glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
 			// and finally bind the texture
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+
+			shader.setVec3("pointLight.ambient", 0.05f, 0.05f, 0.05f);
+			shader.setVec3("pointLight.diffuse", 0.8f, 0.8f, 0.8f);
+			shader.setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
+			shader.setFloat("pointLight.constant", constant);
+			shader.setFloat("pointLight.linear", linear);
+			shader.setFloat("pointLight.quadratic", quadratic);
+			
+			if (name == "texture_diffuse")
+				shader.setInt("material.diffuse", textures[i].id);
+			else if (name == "texture_specular")
+				shader.setInt("material.specular", textures[i].id);
+			else if (name == "texture_normal")
+				shader.setInt("material.normal", textures[i].id);
+			else if (name == "texture_height")
+				shader.setInt("material.height", textures[i].id);
 		}
 
 		// draw mesh

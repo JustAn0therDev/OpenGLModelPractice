@@ -9,8 +9,6 @@
 #include "Model.hpp"
 #include "Camera.hpp"
 
-
-
 // Frames
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -20,6 +18,9 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 bool firstMouse = true;
 float lastX = 0.0f;
 float lastY = 0.0f;
+
+// Point light
+glm::vec3 lightPos{};
 
 // Callback and input handling functions
 void processInput(GLFWwindow* window);
@@ -98,7 +99,11 @@ int main() {
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		shader.setVec3("pointLight.position", lightPos);
+
 		shader.use();
+
+		shader.setVec3("viewPos", camera.Position);
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -137,6 +142,12 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE)
+		lightPos.z -= 1.0f;
+	
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
+		lightPos.z += 1.0f;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

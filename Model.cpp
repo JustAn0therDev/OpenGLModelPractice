@@ -63,7 +63,6 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 	{
 		processNode(node->mChildren[i], scene);
 	}
-
 }
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
@@ -161,6 +160,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 		mat->GetTexture(type, i, &str);
 		// check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
 		bool skip = false;
+
 		for (unsigned int j = 0; j < textures_loaded.size(); j++)
 		{
 			if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
@@ -170,6 +170,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 				break;
 			}
 		}
+
 		if (!skip)
 		{   // if texture hasn't been loaded already, load it
 			Texture texture;
@@ -196,7 +197,7 @@ unsigned int Model::TextureFromFile(const char* path, const string& directory, b
 
 	if (data)
 	{
-		GLenum format;
+		GLenum format = 0;
 		if (nrComponents == 1)
 			format = GL_RED;
 		else if (nrComponents == 3)
