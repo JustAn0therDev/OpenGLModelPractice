@@ -87,21 +87,15 @@ public:
 			// and finally bind the texture
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 
-			shader.setVec3("pointLight.ambient", 0.05f, 0.05f, 0.05f);
+			shader.setVec3("pointLight.ambient", 0.5f, 0.5f, 0.5f);
 			shader.setVec3("pointLight.diffuse", 0.8f, 0.8f, 0.8f);
 			shader.setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
 			shader.setFloat("pointLight.constant", constant);
 			shader.setFloat("pointLight.linear", linear);
 			shader.setFloat("pointLight.quadratic", quadratic);
-			
-			if (name == "texture_diffuse")
-				shader.setInt("material.diffuse", textures[i].id);
-			else if (name == "texture_specular")
-				shader.setInt("material.specular", textures[i].id);
-			else if (name == "texture_normal")
-				shader.setInt("material.normal", textures[i].id);
-			else if (name == "texture_height")
-				shader.setInt("material.height", textures[i].id);
+
+			// Set the texture values in the fragment shader.
+			shader.setInt(name, textures[i].id);
 		}
 
 		// draw mesh
