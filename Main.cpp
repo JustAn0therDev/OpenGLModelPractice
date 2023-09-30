@@ -83,6 +83,12 @@ int main() {
 
 	Shader shader = Shader("assets\\shaders\\model_loading.vs", "assets\\shaders\\model_loading.fs");
 
+	shader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.0f);
+
+	shader.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+	shader.setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
+	shader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
+
 	while (!glfwWindowShouldClose(window)) {
 		// per-frame time logic
 		 // --------------------
@@ -99,12 +105,17 @@ int main() {
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// TODO: Implement directional light
 		shader.setVec3("pointLight.position", lightPos);
 
 		shader.use();
 
 		shader.setVec3("viewPos", camera.Position);
+		shader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+
+		// light properties
+		shader.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+		shader.setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
+		shader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
