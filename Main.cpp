@@ -45,7 +45,7 @@ int main() {
 
 	// glfw window creation
 	// --------------------
-	GLFWwindow* window = glfwCreateWindow(1280, 720, "LearnOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1280, 720, "OpenGL Model Testing", NULL, NULL);
 
 	if (window == NULL)
 	{
@@ -76,6 +76,10 @@ int main() {
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -88,6 +92,8 @@ int main() {
 	shader.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
 	shader.setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
 	shader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
+
+	Shader stencilShader("assets\\shaders\\stencil_shader.vs", "assets\\shaders\\stencil_shader.fs");
 
 	while (!glfwWindowShouldClose(window)) {
 		// per-frame time logic
@@ -103,9 +109,18 @@ int main() {
 		// render
 		// ------
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.setVec3("pointLight.position", lightPos);
+
+		stencilShader.use();
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		stencilShader.setMat4("projection", projection);
+		stencilShader.setMat4("view", view);
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 
 		shader.use();
 
@@ -117,16 +132,32 @@ int main() {
 		shader.setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
 		shader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
 
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 view = camera.GetViewMatrix();
 		shader.setMat4("projection", projection);
 		shader.setMat4("view", view);
 
-		glm::mat4 model = glm::mat4(1.0f);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));	// it's a bit too big for our scene, so scale it down
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 		shader.setMat4("model", model);
 		loadedModel.Draw(shader);
+
+		// After drawting the object with the Stencil test on,
+		// we disable the Stencil test and draw the outline.
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00); // disable writing to the stencil buffer
+		glDisable(GL_DEPTH_TEST);
+
+		stencilShader.use();
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(1.1f, 1.1f, 1.1f));
+		stencilShader.setMat4("model", model);
+		loadedModel.Draw(stencilShader);
+
+		glStencilMask(0xFF);
+		glStencilFunc(GL_ALWAYS, 0, 0xFF);
+		glEnable(GL_DEPTH_TEST);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
@@ -155,11 +186,11 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE)
-		lightPos.z -= 1.0f;
-	
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
-		lightPos.z += 1.0f;
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		lightPos.y += 0.1f;
+
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+		lightPos.y -= 0.1f;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
