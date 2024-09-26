@@ -232,9 +232,9 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		lightPos.y -= 0.1f;
 
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
-		if (canEnableStencilTest) {
-			stencilTestToggle = stencilTestToggle ? false : true;
+	if (canEnableStencilTest) {
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
+			stencilTestToggle = true;
 		}
 		else
 		{
@@ -281,7 +281,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
 	float dot = glm::dot(mouseRayDirection, glm::vec3(1.0f));
 
-	std::cout << dot << std::endl;
+	// std::cout << dot << std::endl;
 
     canEnableStencilTest = dot < -0.4f && dot > -1.2f;
 
