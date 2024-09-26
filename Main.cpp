@@ -36,6 +36,7 @@ glm::vec3 lightPos{};
 // Stencil Test Toggle
 bool stencilTestToggle = false;
 bool canEnableStencilTest = false;
+bool lastActionWasPress = false;
 
 // Callback and input handling functions
 void processInput(GLFWwindow* window);
@@ -232,14 +233,15 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		lightPos.y -= 0.1f;
 
-	if (canEnableStencilTest) {
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
-			stencilTestToggle = true;
-		}
-		else
+	if (canEnableStencilTest) 
+	{
+		int action = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1);
+		if (action == GLFW_PRESS && !lastActionWasPress)
 		{
-			stencilTestToggle = false;
+			stencilTestToggle = !stencilTestToggle;
 		}
+
+		lastActionWasPress = action == GLFW_PRESS;
 	}
 }
 
